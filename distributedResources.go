@@ -67,7 +67,6 @@ func main() {
 	contract = network.GetContract("basic")
 
 	///////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////
 
 	log.Println("--> Submit Transaction: InitLedger, function creates the initial set of landings on the ledger")
 	result, err := contract.SubmitTransaction("InitLedger")
@@ -77,13 +76,6 @@ func main() {
 	log.Println(string(result))
 
 	//////////////////////////////////////////////////////////////////
-
-	log.Println("--> Evaluate Transaction: GetAllLandings, function returns all the current landings on the ledger")
-	result, err = contract.EvaluateTransaction("GetAllLandings")
-	if err != nil {
-		log.Fatalf("Failed to evaluate transaction: %v", err)
-	}
-	log.Println(string(result))
 
 	log.Println("--> Evaluate Transaction: GetAllLandings, function returns all the current landings on the ledger")
 	result, err = contract.EvaluateTransaction("GetAllLandings")

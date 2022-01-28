@@ -86,7 +86,7 @@ func (d DcrTimestamp) String() string {
 	return string(s)
 }
 
-// -- RESPONSE OBJECT
+// -- COLLECTOR RESPONSE OBJECT
 type DcrStats struct {
 	Timestamp  DcrTimestamp     `json:"timestamp"`
 	CPUStats   DrcCPUStats      `json:"cpuStats"`
@@ -97,6 +97,32 @@ type DcrStats struct {
 }
 
 func (d DcrStats) String() string {
+	s, _ := json.Marshal(d)
+	return string(s)
+}
+
+// -- IDENTIFIER OBJECT
+type Identity struct {
+	IP string `json:"ip"`
+}
+
+func (d Identity) String() string {
+	s, _ := json.Marshal(d)
+	return string(s)
+}
+
+// -- SMARTCONTRACT OBJECT
+type StatsObject struct {
+	Identity   Identity         `json:"identity"`
+	Timestamp  DcrTimestamp     `json:"timestamp"`
+	CPUStats   DrcCPUStats      `json:"cpuStats"`
+	MemStats   DrcMemStats      `json:"memStats"`
+	DiskStats  []DrcDiskStats   `json:"diskStats"`
+	ProcStats  DrcProcStats     `json:"procStats"`
+	DockerSats []DrcDockerStats `json:"dockerStats"`
+}
+
+func (d StatsObject) String() string {
 	s, _ := json.Marshal(d)
 	return string(s)
 }
