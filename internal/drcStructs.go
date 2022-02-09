@@ -129,9 +129,9 @@ func (d DrcStats) String() string {
 	return string(s)
 }
 
-func DrcJsonToStruct(v string) (drcStats DrcStats) {
-	json.Unmarshal([]byte(v), &drcStats)
-	return drcStats
+func DrcJsonToStruct(v string) (drcStats DrcStats, err error) {
+	err = json.Unmarshal([]byte(v), &drcStats)
+	return drcStats, err
 }
 
 func ConvertToStorage(drcStats DrcStats) StoredStat {
