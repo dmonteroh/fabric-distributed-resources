@@ -34,12 +34,13 @@ func main() {
 
 	// CONNECT TO THE FABRIC NETWORK
 	network := initFabric()
-	contract := network.GetContract("basic")
+	// GET CONTRACTS
+	resourcesSC := network.GetContract("resources-sc")
 
 	// INITIALIZE HTTP SERVER
 	r := gin.Default()
 	r.Use(internal.EnviromentMiddleware(variables))
-	r.Use(internal.ContractMiddleware(contract))
+	r.Use(internal.ContractMiddleware(resourcesSC))
 
 	// SAVE VARIABLES INSIDE GIN CONTEXT
 

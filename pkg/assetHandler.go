@@ -40,7 +40,7 @@ func UpsertAssetHandler(c *gin.Context) {
 
 func assetExists(c *gin.Context, statIP string) bool {
 	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("fabric-contract").(*gateway.Contract)
+	contract := c.MustGet("resources-sc").(*gateway.Contract)
 
 	res, err := contract.EvaluateTransaction("AssetExists", statIP)
 	if err != nil {
@@ -55,7 +55,7 @@ func assetExists(c *gin.Context, statIP string) bool {
 
 func updateAsset(c *gin.Context, stats internal.StoredStat) {
 	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("fabric-contract").(*gateway.Contract)
+	contract := c.MustGet("resources-sc").(*gateway.Contract)
 
 	res, err := contract.SubmitTransaction("UpdateAsset", stats.ID, stats.String())
 	if err != nil {
@@ -66,7 +66,7 @@ func updateAsset(c *gin.Context, stats internal.StoredStat) {
 
 func createAsset(c *gin.Context, stats internal.StoredStat) {
 	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("fabric-contract").(*gateway.Contract)
+	contract := c.MustGet("resources-sc").(*gateway.Contract)
 
 	res, err := contract.SubmitTransaction("CreateAsset", stats.ID, stats.String())
 	if err != nil {
@@ -77,7 +77,7 @@ func createAsset(c *gin.Context, stats internal.StoredStat) {
 
 func GetAllAssetsHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("fabric-contract").(*gateway.Contract)
+	contract := c.MustGet("resources-sc").(*gateway.Contract)
 
 	res, err := contract.EvaluateTransaction("GetAllAssets")
 	if err != nil {
@@ -88,7 +88,7 @@ func GetAllAssetsHandler(c *gin.Context) {
 
 func GetAssetHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("fabric-contract").(*gateway.Contract)
+	contract := c.MustGet("resources-sc").(*gateway.Contract)
 	asset := c.Param("asset")
 
 	res, err := contract.EvaluateTransaction("ReadAsset", asset)
