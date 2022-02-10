@@ -25,6 +25,8 @@ func main() {
 	appType := internal.GetEnv("APP_TYPE", "single_insert")
 	execMode := internal.GetEnv("EXEC_MODE", "DEBUG")
 	listenPort := internal.GetEnv("INTERNAL_PORT", "8080")
+	resourcesContract := internal.GetEnv("RESROUCES_SC", "resources-sc")
+	inventoryContract := internal.GetEnv("INVENTORY_SC", "inventory-sc")
 
 	// MAP VARIABLES INTO MAP
 	variables := map[string]string{
@@ -35,12 +37,20 @@ func main() {
 	// CONNECT TO THE FABRIC NETWORK
 	network := initFabric()
 	// GET CONTRACTS
-	resourcesSC := network.GetContract("resources-sc")
+	resourcesSC := network.GetContract(resourcesContract)
+	inentorySC := network.GetContract(inventoryContract)
 
-	// INITIALIZE HTTP SERVER
+	// INIT IS FOR DEBUGGING PURPOSES
+	// _, err := inentorySC.SubmitTransaction("InitLedger")
+	// if err != nil {
+	// 	log.Fatalf("Failed to Submit transaction: %v", err)
+	// }
+
+	// INITIALIZE HTTP SERVER AND ADD MIDDLEWARE
 	r := gin.Default()
 	r.Use(internal.EnviromentMiddleware(variables))
 	r.Use(internal.ContractMiddleware(resourcesSC))
+	r.Use(internal.ContractMiddleware(inentorySC))
 
 	// SAVE VARIABLES INSIDE GIN CONTEXT
 
@@ -48,6 +58,7 @@ func main() {
 	r.GET("/assets", pkg.GetAllAssetsHandler)
 	r.GET("/assets/:asset", pkg.GetAssetHandler)
 	r.POST("/assets", pkg.UpsertAssetHandler)
+	r.PUT("/assets", pkg.UpdateAssetHandler)
 	r.POST("/collector", pkg.UpsertAssetHandler)
 
 	// START HTTP SERVER

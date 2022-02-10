@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strconv"
 
@@ -38,6 +39,22 @@ func UpsertAssetHandler(c *gin.Context) {
 	}
 }
 
+func UpdateAssetHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+
+	jsonData, _ := ioutil.ReadAll(c.Request.Body)
+	stats, err := internal.JsonToStoredStat(string(jsonData))
+	if err != nil {
+		panic(err)
+	}
+
+	if assetExists(c, stats.ID) {
+		updateAsset(c, stats)
+	} else {
+		c.JSON(404, gin.H{"error": fmt.Sprintf("Error: Failed to submit, the key %s does not exist", stats.ID)})
+	}
+}
+
 func assetExists(c *gin.Context, statIP string) bool {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("resources-sc").(*gateway.Contract)
@@ -57,22 +74,22 @@ func updateAsset(c *gin.Context, stats internal.StoredStat) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("resources-sc").(*gateway.Contract)
 
-	res, err := contract.SubmitTransaction("UpdateAsset", stats.ID, stats.String())
+	_, err := contract.SubmitTransaction("UpdateAsset", stats.ID, stats.String())
 	if err != nil {
 		panic(err.Error())
 	}
-	c.JSON(200, string(res))
+	c.JSON(200, gin.H{"key": stats.ID})
 }
 
 func createAsset(c *gin.Context, stats internal.StoredStat) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("resources-sc").(*gateway.Contract)
 
-	res, err := contract.SubmitTransaction("CreateAsset", stats.ID, stats.String())
+	_, err := contract.SubmitTransaction("CreateAsset", stats.ID, stats.String())
 	if err != nil {
 		panic(err.Error())
 	}
-	c.JSON(200, string(res))
+	c.JSON(200, gin.H{"key": stats.ID})
 }
 
 func GetAllAssetsHandler(c *gin.Context) {
@@ -83,7 +100,12 @@ func GetAllAssetsHandler(c *gin.Context) {
 	if err != nil {
 		panic(err.Error())
 	}
-	c.JSON(200, string(res))
+	readRes, err := internal.ArrayStoredStat(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
 }
 
 func GetAssetHandler(c *gin.Context) {
@@ -95,7 +117,11 @@ func GetAssetHandler(c *gin.Context) {
 	if err != nil {
 		panic(err.Error())
 	}
-	c.JSON(200, string(res))
+	readRes, err := internal.JsonToStoredStat(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
 }
 
 // FABRIC CALLS

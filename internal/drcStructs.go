@@ -124,6 +124,16 @@ type StoredStat struct {
 	DockerSats []DrcDockerStats `json:"dockerStats"`
 }
 
+func JsonToStoredStat(v string) (storedStat StoredStat, err error) {
+	err = json.Unmarshal([]byte(v), &storedStat)
+	return storedStat, err
+}
+
+func ArrayStoredStat(v string) (storedStats []StoredStat, err error) {
+	err = json.Unmarshal([]byte(v), &storedStats)
+	return storedStats, err
+}
+
 func (d DrcStats) String() string {
 	s, _ := json.Marshal(d)
 	return string(s)
