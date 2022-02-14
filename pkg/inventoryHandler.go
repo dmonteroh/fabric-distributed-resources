@@ -25,6 +25,22 @@ func GetAllInventoryHandler(c *gin.Context) {
 	c.JSON(200, readRes)
 }
 
+func GetServersInventoryHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("inventory").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("GetServerAssets")
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
 func GetInventoryHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("inventory").(*gateway.Contract)
@@ -51,7 +67,7 @@ func UpdateInventory(c *gin.Context) {
 		panic(err)
 	}
 
-	_, err = contract.SubmitTransaction("UpdateAsset", inventory.ID, inventory.String())
+	_, err = contract.SubmitTransaction("UpdateAsset", inventory.String())
 	if err != nil {
 		panic(err.Error())
 	}
@@ -68,7 +84,7 @@ func CreateInventory(c *gin.Context) {
 		panic(err)
 	}
 
-	_, err = contract.SubmitTransaction("CreateAsset", inventory.ID, inventory.String())
+	_, err = contract.SubmitTransaction("CreateAsset", inventory.String())
 	if err != nil {
 		panic(err.Error())
 	}
