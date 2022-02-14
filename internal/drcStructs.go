@@ -3,6 +3,8 @@ package internal
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/wI2L/jettison"
 )
 
 // -- CPU
@@ -14,7 +16,7 @@ type DrcCPUStats struct {
 }
 
 func (d DrcCPUStats) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -31,7 +33,7 @@ type DrcDiskStats struct {
 }
 
 func (d DrcDiskStats) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -43,7 +45,7 @@ type DrcMemStats struct {
 }
 
 func (d DrcMemStats) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -56,7 +58,7 @@ type DrcProcStats struct {
 }
 
 func (d DrcProcStats) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -70,7 +72,7 @@ type DrcDockerStats struct {
 }
 
 func (d DrcDockerStats) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -82,7 +84,7 @@ type DrcTimestamp struct {
 }
 
 func (d DrcTimestamp) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -98,7 +100,7 @@ type DrcHost struct {
 }
 
 func (d DrcHost) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -135,7 +137,7 @@ func ArrayStoredStat(v string) (storedStats []StoredStat, err error) {
 }
 
 func (d DrcStats) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }
 
@@ -158,6 +160,6 @@ func ConvertToStorage(drcStats DrcStats) StoredStat {
 }
 
 func (d StoredStat) String() string {
-	s, _ := json.Marshal(d)
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
 	return string(s)
 }

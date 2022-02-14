@@ -37,9 +37,9 @@ func EnviromentMiddleware(variables map[string]string) gin.HandlerFunc {
 }
 
 // Adds the fabric contract to the gin context as middleware.
-func ContractMiddleware(contract *gateway.Contract) gin.HandlerFunc {
+func ContractMiddleware(contractName string, contract *gateway.Contract) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set(contract.Name(), contract)
+		c.Set(contractName, contract)
 		//c.Next()
 	}
 }

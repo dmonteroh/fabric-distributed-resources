@@ -1,8 +1,3 @@
-/*
-Copyright 2020 IBM All Rights Reserved.
-SPDX-License-Identifier: Apache-2.0
-*/
-
 package main
 
 import (
@@ -38,7 +33,7 @@ func main() {
 	network := initFabric()
 	// GET CONTRACTS
 	resourcesSC := network.GetContract(resourcesContract)
-	inentorySC := network.GetContract(inventoryContract)
+	inventorySC := network.GetContract(inventoryContract)
 
 	// INIT IS FOR DEBUGGING PURPOSES
 	// _, err := inentorySC.SubmitTransaction("InitLedger")
@@ -49,17 +44,28 @@ func main() {
 	// INITIALIZE HTTP SERVER AND ADD MIDDLEWARE
 	r := gin.Default()
 	r.Use(internal.EnviromentMiddleware(variables))
-	r.Use(internal.ContractMiddleware(resourcesSC))
-	r.Use(internal.ContractMiddleware(inentorySC))
+	r.Use(internal.ContractMiddleware("resources", resourcesSC))
+	r.Use(internal.ContractMiddleware("inventory", inventorySC))
 
-	// SAVE VARIABLES INSIDE GIN CONTEXT
-
-	// APP HTTP ROUTES
-	r.GET("/assets", pkg.GetAllAssetsHandler)
-	r.GET("/assets/:asset", pkg.GetAssetHandler)
-	r.POST("/assets", pkg.UpsertAssetHandler)
-	r.PUT("/assets", pkg.UpdateAssetHandler)
-	r.POST("/collector", pkg.UpsertAssetHandler)
+	// --- APP HTTP ROUTES
+	// ASSETS
+	r.GET("/resources", pkg.GetAllResourcesHandler)
+	r.GET("/resources/:asset", pkg.GetResourceHandler)
+	r.PUT("/resources", pkg.UpdateResourceHandler)
+	r.POST("/resources", pkg.UpsertResourceHandler)
+	// INVENTORY
+	r.GET("/inventory", pkg.GetAllInventoryHandler)
+	r.GET("/inventory/:asset", pkg.GetInventoryHandler)
+	r.PUT("/inventory", pkg.UpdateInventory)
+	r.POST("/inventory", pkg.CreateInventory)
+	// LATENCY
+	r.GET("/latency")
+	r.GET("/latency/:asset")
+	r.PUT("/latency")
+	r.POST("/latency")
+	// -- COLLECTOR
+	r.POST("/collector", pkg.UpsertResourceHandler)
+	r.POST("/measurement")
 
 	// START HTTP SERVER
 	r.Run(":" + listenPort)

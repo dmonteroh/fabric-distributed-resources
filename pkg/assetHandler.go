@@ -11,7 +11,7 @@ import (
 	"github.com/dmonteroh/fabric-distributed-resources/internal"
 )
 
-func UpsertAssetHandler(c *gin.Context) {
+func UpsertResourceHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	appType := c.MustGet("APP_TYPE").(string)
 	clientIP := c.ClientIP()
@@ -25,21 +25,21 @@ func UpsertAssetHandler(c *gin.Context) {
 		singleID := clientIP + "-" + internal.DateFormatID(drcStats.Timestamp.TimeSeconds)
 		stats := internal.ConvertToStorage(drcStats)
 		stats.ID = singleID
-		createAsset(c, stats)
+		createResource(c, stats)
 	} else if appType == "single_upsert" {
 		stats := internal.ConvertToStorage(drcStats)
 		stats.ID = clientIP
-		if assetExists(c, stats.ID) {
-			updateAsset(c, stats)
+		if resourceExists(c, stats.ID) {
+			updateResource(c, stats)
 		} else {
-			createAsset(c, stats)
+			createResource(c, stats)
 		}
 	} else {
 		panic("APP_TYPE not implemented")
 	}
 }
 
-func UpdateAssetHandler(c *gin.Context) {
+func UpdateResourceHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
@@ -48,53 +48,16 @@ func UpdateAssetHandler(c *gin.Context) {
 		panic(err)
 	}
 
-	if assetExists(c, stats.ID) {
-		updateAsset(c, stats)
+	if resourceExists(c, stats.ID) {
+		updateResource(c, stats)
 	} else {
 		c.JSON(404, gin.H{"error": fmt.Sprintf("Error: Failed to submit, the key %s does not exist", stats.ID)})
 	}
 }
 
-func assetExists(c *gin.Context, statIP string) bool {
+func GetAllResourcesHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("resources-sc").(*gateway.Contract)
-
-	res, err := contract.EvaluateTransaction("AssetExists", statIP)
-	if err != nil {
-		panic(err.Error())
-	}
-	boolRes, err := strconv.ParseBool(string(res))
-	if err != nil {
-		panic(err.Error())
-	}
-	return boolRes
-}
-
-func updateAsset(c *gin.Context, stats internal.StoredStat) {
-	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("resources-sc").(*gateway.Contract)
-
-	_, err := contract.SubmitTransaction("UpdateAsset", stats.ID, stats.String())
-	if err != nil {
-		panic(err.Error())
-	}
-	c.JSON(200, gin.H{"key": stats.ID})
-}
-
-func createAsset(c *gin.Context, stats internal.StoredStat) {
-	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("resources-sc").(*gateway.Contract)
-
-	_, err := contract.SubmitTransaction("CreateAsset", stats.ID, stats.String())
-	if err != nil {
-		panic(err.Error())
-	}
-	c.JSON(200, gin.H{"key": stats.ID})
-}
-
-func GetAllAssetsHandler(c *gin.Context) {
-	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("resources-sc").(*gateway.Contract)
+	contract := c.MustGet("resources").(*gateway.Contract)
 
 	res, err := contract.EvaluateTransaction("GetAllAssets")
 	if err != nil {
@@ -108,9 +71,9 @@ func GetAllAssetsHandler(c *gin.Context) {
 	c.JSON(200, readRes)
 }
 
-func GetAssetHandler(c *gin.Context) {
+func GetResourceHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("resources-sc").(*gateway.Contract)
+	contract := c.MustGet("resources").(*gateway.Contract)
 	asset := c.Param("asset")
 
 	res, err := contract.EvaluateTransaction("ReadAsset", asset)
@@ -122,6 +85,44 @@ func GetAssetHandler(c *gin.Context) {
 		panic(err.Error())
 	}
 	c.JSON(200, readRes)
+}
+
+// PRIVATE FUNCTIONS
+func resourceExists(c *gin.Context, statIP string) bool {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("resources").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("AssetExists", statIP)
+	if err != nil {
+		panic(err.Error())
+	}
+	boolRes, err := strconv.ParseBool(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	return boolRes
+}
+
+func updateResource(c *gin.Context, stats internal.StoredStat) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("resources").(*gateway.Contract)
+
+	_, err := contract.SubmitTransaction("UpdateAsset", stats.ID, stats.String())
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, gin.H{"key": stats.ID})
+}
+
+func createResource(c *gin.Context, stats internal.StoredStat) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("resources").(*gateway.Contract)
+
+	_, err := contract.SubmitTransaction("CreateAsset", stats.ID, stats.String())
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, gin.H{"key": stats.ID})
 }
 
 // FABRIC CALLS
