@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,9 @@ func GetServersInventoryHandler(c *gin.Context) {
 
 	res, err := contract.EvaluateTransaction("GetServerAssets")
 	if err != nil {
+		fmt.Println(res)
+		fmt.Println("-------------")
+		fmt.Println(err.Error())
 		panic(err.Error())
 	}
 	readRes, err := internal.JsonToAssetArray(string(res))
@@ -57,7 +61,7 @@ func GetInventoryHandler(c *gin.Context) {
 	c.JSON(200, readRes)
 }
 
-func UpdateInventory(c *gin.Context) {
+func UpdateInventoryHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("inventory").(*gateway.Contract)
 
@@ -74,7 +78,7 @@ func UpdateInventory(c *gin.Context) {
 	c.JSON(200, gin.H{"key": inventory.ID})
 }
 
-func CreateInventory(c *gin.Context) {
+func CreateInventoryHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("inventory").(*gateway.Contract)
 

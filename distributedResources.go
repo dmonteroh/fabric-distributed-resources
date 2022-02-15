@@ -22,6 +22,7 @@ func main() {
 	listenPort := internal.GetEnv("INTERNAL_PORT", "8080")
 	resourcesContract := internal.GetEnv("RESROUCES_SC", "resources-sc")
 	inventoryContract := internal.GetEnv("INVENTORY_SC", "inventory-sc")
+	latencyContract := internal.GetEnv("LATENCY_SC", "latency-sc")
 
 	// MAP VARIABLES INTO MAP
 	variables := map[string]string{
@@ -34,6 +35,7 @@ func main() {
 	// GET CONTRACTS
 	resourcesSC := network.GetContract(resourcesContract)
 	inventorySC := network.GetContract(inventoryContract)
+	latencySC := network.GetContract(latencyContract)
 
 	// INIT IS FOR DEBUGGING PURPOSES
 	// _, err := inentorySC.SubmitTransaction("InitLedger")
@@ -46,6 +48,7 @@ func main() {
 	r.Use(internal.EnviromentMiddleware(variables))
 	r.Use(internal.ContractMiddleware("resources", resourcesSC))
 	r.Use(internal.ContractMiddleware("inventory", inventorySC))
+	r.Use(internal.ContractMiddleware("latency", latencySC))
 
 	// --- APP HTTP ROUTES
 	// ASSETS
@@ -55,17 +58,22 @@ func main() {
 	r.POST("/resources", pkg.UpsertResourceHandler)
 	// INVENTORY
 	r.GET("/inventory", pkg.GetAllInventoryHandler)
+	r.GET("/inventory/servers", pkg.GetServersInventoryHandler)
 	r.GET("/inventory/:asset", pkg.GetInventoryHandler)
-	r.PUT("/inventory", pkg.UpdateInventory)
-	r.POST("/inventory", pkg.CreateInventory)
+	r.PUT("/inventory", pkg.UpdateInventoryHandler)
+	r.POST("/inventory", pkg.CreateInventoryHandler)
 	// LATENCY
-	r.GET("/latency")
-	r.GET("/latency/:asset")
-	r.PUT("/latency")
-	r.POST("/latency")
+	r.GET("/latency", pkg.GetAllLatencyHandler)
+	r.GET("/latency/servers", pkg.GetServersLatencyHandler)
+	r.GET("/latency/servers/except/self", pkg.GetServersExceptSelfLatencyHandler)
+	r.GET("/latency/servers/except/:id", pkg.GetServersExceptIdLatencyHandler)
+	r.GET("/latency/servers/targets", pkg.GetLatencyTargetsHandler)
+	r.GET("/latency/:asset", pkg.GetLatencyHandler)
+	r.PUT("/latency", pkg.UpdateLatencyHandler)
+	r.POST("/latency", pkg.CreateLatencyHandler)
 	// -- COLLECTOR
 	r.POST("/collector", pkg.UpsertResourceHandler)
-	r.POST("/measurement")
+	r.POST("/measurement", pkg.CreateLatencyHandler)
 
 	// START HTTP SERVER
 	r.Run(":" + listenPort)
