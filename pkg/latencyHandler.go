@@ -68,6 +68,73 @@ func getServersExcept(c *gin.Context, id string) []internal.Asset {
 	return readRes
 }
 
+func GetSensorInventoryExceptLatencyHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("latency").(*gateway.Contract)
+	asset := c.Param("asset")
+
+	res, err := contract.EvaluateTransaction("GetSensorAssetsExceptId", asset)
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
+func GetSensorRobotInventoryLatencyHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("latency").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("GetSensorAndRobotAssets")
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
+func GetSensorRobotInventoryExceptLatencyHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("latency").(*gateway.Contract)
+	asset := c.Param("asset")
+
+	res, err := contract.EvaluateTransaction("GetSensorAndRobotAssetsExceptId", asset)
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
+func GetRobotInventoryExceptLatencyHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("latency").(*gateway.Contract)
+	asset := c.Param("asset")
+
+	res, err := contract.EvaluateTransaction("GetRobotAssetsExceptId", asset)
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
 func GetLatencyTargetsHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	id := c.ClientIP()

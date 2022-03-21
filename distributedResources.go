@@ -58,6 +58,8 @@ func main() {
 	r.POST("/resources", pkg.UpsertResourceHandler)
 	// INVENTORY
 	r.GET("/inventory", pkg.GetAllInventoryHandler)
+	r.GET("/inventory/robots", pkg.GetRobotInventoryHandler)
+	r.GET("/inventory/sensors", pkg.GetSensorInventoryHandler)
 	r.GET("/inventory/servers", pkg.GetServersInventoryHandler)
 	r.GET("/inventory/:asset", pkg.GetInventoryHandler)
 	r.PUT("/inventory", pkg.UpdateInventoryHandler)

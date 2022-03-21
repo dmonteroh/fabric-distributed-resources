@@ -26,25 +26,6 @@ func GetAllInventoryHandler(c *gin.Context) {
 	c.JSON(200, readRes)
 }
 
-func GetServersInventoryHandler(c *gin.Context) {
-	defer internal.RecoverEndpoint(c)
-	contract := c.MustGet("inventory").(*gateway.Contract)
-
-	res, err := contract.EvaluateTransaction("GetServerAssets")
-	if err != nil {
-		fmt.Println(res)
-		fmt.Println("-------------")
-		fmt.Println(err.Error())
-		panic(err.Error())
-	}
-	readRes, err := internal.JsonToAssetArray(string(res))
-	if err != nil {
-		panic(err.Error())
-	}
-
-	c.JSON(200, readRes)
-}
-
 func GetInventoryHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("inventory").(*gateway.Contract)
@@ -94,3 +75,61 @@ func CreateInventoryHandler(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"key": inventory.ID})
 }
+
+func GetServersInventoryHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("inventory").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("GetServerAssets")
+	if err != nil {
+		fmt.Println(res)
+		fmt.Println("-------------")
+		fmt.Println(err.Error())
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
+func GetRobotInventoryHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("inventory").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("GetRobotAssets")
+	if err != nil {
+		fmt.Println(res)
+		fmt.Println("-------------")
+		fmt.Println(err.Error())
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
+func GetSensorInventoryHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("inventory").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("GetSensorAssets")
+	if err != nil {
+		fmt.Println(res)
+		fmt.Println("-------------")
+		fmt.Println(err.Error())
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
