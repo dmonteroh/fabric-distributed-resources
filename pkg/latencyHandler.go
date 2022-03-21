@@ -71,17 +71,20 @@ func getServersExcept(c *gin.Context, id string) []internal.Asset {
 func GetLatencyTargetsHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	id := c.ClientIP()
-	targetKeys := []string{"hostname", "hostPort", "hostUser", "hostPassword"}
 	targetAssets := getServersExcept(c, id)
 	targets := internal.LatencyTargets{
 		Source:  id,
 		Targets: []internal.LatencyTarget{},
 	}
+
 	for _, asset := range targetAssets {
-		if internal.KeysInStringMap(asset.Properties, targetKeys) {
-			target := internal.LatencyTargetFromMap(asset.Properties)
-			targets.Targets = append(targets.Targets, target)
-		}
+		target := internal.LatencyTargetFromMap(asset.Properties)
+		targets.Targets = append(targets.Targets, target)
+		//// Removed due to properties being added as a struct instead of a
+		// if internal.KeysInStringMap(asset.Properties, targetKeys) {
+		// 	target := internal.LatencyTargetFromMap(asset.Properties)
+		// 	targets.Targets = append(targets.Targets, target)
+		// }
 	}
 
 	c.JSON(200, targets)

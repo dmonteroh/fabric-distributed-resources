@@ -21,12 +21,12 @@ type LatencyTarget struct {
 	HostPassword string `json:"hostPassword"`
 }
 
-func LatencyTargetFromMap(mapObj map[string]string) LatencyTarget {
+func LatencyTargetFromMap(properties Properties) LatencyTarget {
 	return LatencyTarget{
-		Hostname:     mapObj["hostname"],
-		Hostport:     mapObj["hostPort"],
-		HostUser:     mapObj["hostUser"],
-		HostPassword: mapObj["hostPassword"],
+		Hostname:     properties.Hostname,
+		Hostport:     properties.HostPort,
+		HostUser:     properties.HostUser,
+		HostPassword: properties.HostPassword,
 	}
 }
 
