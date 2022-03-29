@@ -12,7 +12,7 @@ import (
 
 func GetEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok && value != "" {
-		fmt.Println(value)
+		//fmt.Println(value)
 		return value
 	}
 	return fallback

@@ -22,7 +22,7 @@ type Asset struct {
 // Storing the information in plain text is not recommended due to security issues, even if the data can be saved as private in the Blockchain
 // instead, servers should be assigned SSH keys
 type Properties struct {
-	GPU          bool   `json:"gpu"`
+	GPU          int    `json:"gpu"` //0 = false, 1 = true
 	Hostname     string `json:"hostname"`
 	HostPort     string `json:"hostPort"`
 	HostUser     string `json:"hostUser"`

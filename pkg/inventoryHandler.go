@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
@@ -82,9 +81,6 @@ func GetServersInventoryHandler(c *gin.Context) {
 
 	res, err := contract.EvaluateTransaction("GetServerAssets")
 	if err != nil {
-		fmt.Println(res)
-		fmt.Println("-------------")
-		fmt.Println(err.Error())
 		panic(err.Error())
 	}
 	readRes, err := internal.JsonToAssetArray(string(res))
@@ -101,9 +97,6 @@ func GetRobotInventoryHandler(c *gin.Context) {
 
 	res, err := contract.EvaluateTransaction("GetRobotAssets")
 	if err != nil {
-		fmt.Println(res)
-		fmt.Println("-------------")
-		fmt.Println(err.Error())
 		panic(err.Error())
 	}
 	readRes, err := internal.JsonToAssetArray(string(res))
@@ -120,9 +113,6 @@ func GetSensorInventoryHandler(c *gin.Context) {
 
 	res, err := contract.EvaluateTransaction("GetSensorAssets")
 	if err != nil {
-		fmt.Println(res)
-		fmt.Println("-------------")
-		fmt.Println(err.Error())
 		panic(err.Error())
 	}
 	readRes, err := internal.JsonToAssetArray(string(res))
@@ -132,4 +122,3 @@ func GetSensorInventoryHandler(c *gin.Context) {
 
 	c.JSON(200, readRes)
 }
-

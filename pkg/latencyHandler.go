@@ -31,10 +31,13 @@ func GetServersLatencyHandler(c *gin.Context) {
 
 	res, err := contract.EvaluateTransaction("GetServerAssets")
 	if err != nil {
+
 		panic(err.Error())
 	}
+
 	readRes, err := internal.JsonToAssetArray(string(res))
 	if err != nil {
+
 		panic(err.Error())
 	}
 
@@ -68,6 +71,36 @@ func getServersExcept(c *gin.Context, id string) []internal.Asset {
 	return readRes
 }
 
+func GetLimitedLatencyListTarget(c *gin.Context) {
+	contract := c.MustGet("latency").(*gateway.Contract)
+	target := c.Param("target")
+	minutes := c.Param("minutes")
+	res, err := contract.EvaluateTransaction("GetAssetListTimeTarget", target, minutes)
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
+}
+
+func GetLimitedLatencyListSource(c *gin.Context) {
+	contract := c.MustGet("latency").(*gateway.Contract)
+	source := c.Param("source")
+	minutes := c.Param("minutes")
+	res, err := contract.EvaluateTransaction("GetAssetListTimeSource", source, minutes)
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
+}
+
 func GetSensorInventoryExceptLatencyHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("latency").(*gateway.Contract)
@@ -99,6 +132,21 @@ func GetSensorRobotInventoryLatencyHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, readRes)
+}
+
+func getSensorRobotInventory(c *gin.Context) []internal.Asset {
+	contract := c.MustGet("latency").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("GetSensorAndRobotAssets")
+	if err != nil {
+
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	return readRes
 }
 
 func GetSensorRobotInventoryExceptLatencyHandler(c *gin.Context) {
@@ -138,7 +186,7 @@ func GetRobotInventoryExceptLatencyHandler(c *gin.Context) {
 func GetLatencyTargetsHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	id := c.ClientIP()
-	targetAssets := getServersExcept(c, id)
+	targetAssets := getSensorRobotInventory(c)
 	targets := internal.LatencyTargets{
 		Source:  id,
 		Targets: []internal.LatencyTarget{},

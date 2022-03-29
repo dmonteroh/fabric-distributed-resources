@@ -66,10 +66,9 @@ func main() {
 	r.POST("/inventory", pkg.CreateInventoryHandler)
 	// LATENCY
 	r.GET("/latency", pkg.GetAllLatencyHandler)
-	r.GET("/latency/servers", pkg.GetServersLatencyHandler)
-	r.GET("/latency/servers/except/self", pkg.GetServersExceptSelfLatencyHandler)
-	r.GET("/latency/servers/except/:id", pkg.GetServersExceptIdLatencyHandler)
-	r.GET("/latency/servers/targets", pkg.GetLatencyTargetsHandler)
+	r.GET("/latency/targets", pkg.GetLatencyTargetsHandler)
+	r.GET("/latency/source/:source/minutes/:minutes", pkg.GetLimitedLatencyListSource)
+	r.GET("/latency/target/:target/minutes/:minutes", pkg.GetLimitedLatencyListTarget)
 	r.GET("/latency/:asset", pkg.GetLatencyHandler)
 	r.PUT("/latency", pkg.UpdateLatencyHandler)
 	r.POST("/latency", pkg.CreateLatencyHandler)
