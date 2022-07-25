@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"io/ioutil"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
@@ -76,10 +77,27 @@ func GetLimitedLatencyListTarget(c *gin.Context) {
 	target := c.Param("target")
 	minutes := c.Param("minutes")
 	res, err := contract.EvaluateTransaction("GetAssetListTimeTarget", target, minutes)
+
 	if err != nil {
 		panic(err.Error())
 	}
-	readRes, err := internal.JsonToAssetArray(string(res))
+	readRes, err := internal.JsonToLatencyAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
+}
+
+func GetAnalysisTimeTarget(c *gin.Context) {
+	contract := c.MustGet("latency").(*gateway.Contract)
+	target := c.Param("target")
+	minutes := c.Param("minutes")
+	res, err := contract.EvaluateTransaction("GetAnalysisTimeTarget", target, minutes)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToLatencyAnalysisArray(string(res))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -94,7 +112,7 @@ func GetLimitedLatencyListSource(c *gin.Context) {
 	if err != nil {
 		panic(err.Error())
 	}
-	readRes, err := internal.JsonToAssetArray(string(res))
+	readRes, err := internal.JsonToLatencyAssetArray(string(res))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -134,27 +152,28 @@ func GetSensorRobotInventoryLatencyHandler(c *gin.Context) {
 	c.JSON(200, readRes)
 }
 
-func getSensorRobotInventory(c *gin.Context) []internal.Asset {
-	contract := c.MustGet("latency").(*gateway.Contract)
+// Unused, always gets Robot/Sensor except current ID to make sure
+// func getSensorRobotInventory(c *gin.Context) []internal.Asset {
+// 	contract := c.MustGet("latency").(*gateway.Contract)
 
-	res, err := contract.EvaluateTransaction("GetSensorAndRobotAssets")
-	if err != nil {
+// 	res, err := contract.EvaluateTransaction("GetSensorAndRobotAssets")
+// 	if err != nil {
 
-		panic(err.Error())
-	}
-	readRes, err := internal.JsonToAssetArray(string(res))
-	if err != nil {
-		panic(err.Error())
-	}
-	return readRes
-}
+// 		panic(err.Error())
+// 	}
+// 	readRes, err := internal.JsonToAssetArray(string(res))
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// 	return readRes
+// }
 
-func GetSensorRobotInventoryExceptLatencyHandler(c *gin.Context) {
+func GetSensorRobotInventoryExceptLatencyHandler(c *gin.Context, id string) []internal.Asset {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("latency").(*gateway.Contract)
-	asset := c.Param("asset")
+	//asset := c.Param("asset")
 
-	res, err := contract.EvaluateTransaction("GetSensorAndRobotAssetsExceptId", asset)
+	res, err := contract.EvaluateTransaction("GetSensorAndRobotAssetsExceptId", id)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -163,7 +182,8 @@ func GetSensorRobotInventoryExceptLatencyHandler(c *gin.Context) {
 		panic(err.Error())
 	}
 
-	c.JSON(200, readRes)
+	return readRes
+	//c.JSON(200, readRes)
 }
 
 func GetRobotInventoryExceptLatencyHandler(c *gin.Context) {
@@ -186,7 +206,7 @@ func GetRobotInventoryExceptLatencyHandler(c *gin.Context) {
 func GetLatencyTargetsHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	id := c.ClientIP()
-	targetAssets := getSensorRobotInventory(c)
+	targetAssets := GetSensorRobotInventoryExceptLatencyHandler(c, id)
 	targets := internal.LatencyTargets{
 		Source:  id,
 		Targets: []internal.LatencyTarget{},
@@ -201,7 +221,7 @@ func GetLatencyTargetsHandler(c *gin.Context) {
 		// 	targets.Targets = append(targets.Targets, target)
 		// }
 	}
-
+	log.Println(targets.String())
 	c.JSON(200, targets)
 }
 
@@ -255,5 +275,7 @@ func CreateLatencyHandler(c *gin.Context) {
 	if err != nil {
 		panic(err.Error())
 	}
+
+	log.Println(latencyAsset.String())
 	c.JSON(200, gin.H{"key": latencyAsset.ID})
 }

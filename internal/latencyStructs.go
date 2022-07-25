@@ -14,6 +14,11 @@ type LatencyTargets struct {
 	Targets []LatencyTarget `json:"targets"`
 }
 
+func (d LatencyTargets) String() string {
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
+	return string(s)
+}
+
 type LatencyTarget struct {
 	Hostname     string `json:"hostname"`
 	Hostport     string `json:"hostPort"`
@@ -117,4 +122,39 @@ func CreateLatencyID(appType string, source string, timestamp LatencyTimestamp) 
 	} else {
 		panic("APP_TYPE not implemented")
 	}
+}
+
+/////////////////////
+
+type LatencyAnalysis struct {
+	Hostname       string  `json:"hostname"`
+	Target         string  `json:"target"`
+	Duration       int     `json:"duration"`
+	AverageLatency float64 `json:"averageLatency"`
+	LatencyCount   int     `json:"latencyCount"`
+	LatencySummary []int64 `json:"statSummary"`
+}
+
+func (d LatencyAnalysis) String() string {
+	s, _ := jettison.MarshalOpts(d, jettison.NilMapEmpty(), jettison.NilSliceEmpty())
+	return string(s)
+}
+
+//func SummarizeLantecy(latencyAsset LatencyAsset) LatencyAnalysis {}
+
+func AnalizeLatencySummary(latencyAnalysis LatencyAnalysis) LatencyAnalysis {
+	if len(latencyAnalysis.LatencySummary) > 0 {
+		var AverageLatency float64 = 0
+		for _, summary := range latencyAnalysis.LatencySummary {
+			AverageLatency += float64(summary)
+		}
+		latencyAnalysis.AverageLatency = AverageLatency / float64(len(latencyAnalysis.LatencySummary))
+	}
+
+	return latencyAnalysis
+}
+
+func JsonToLatencyAnalysisArray(v string) (assets []LatencyAnalysis, err error) {
+	err = json.Unmarshal([]byte(v), &assets)
+	return assets, err
 }

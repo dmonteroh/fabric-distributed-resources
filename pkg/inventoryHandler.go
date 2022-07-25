@@ -91,6 +91,22 @@ func GetServersInventoryHandler(c *gin.Context) {
 	c.JSON(200, readRes)
 }
 
+func GetGPUServersInventoryHandler(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	contract := c.MustGet("inventory").(*gateway.Contract)
+
+	res, err := contract.EvaluateTransaction("GetServerGPUAssets")
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToAssetArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, readRes)
+}
+
 func GetRobotInventoryHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	contract := c.MustGet("inventory").(*gateway.Contract)
