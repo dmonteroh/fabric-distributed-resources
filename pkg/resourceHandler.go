@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
@@ -14,7 +15,7 @@ import (
 func UpsertResourceHandler(c *gin.Context) {
 	defer internal.RecoverEndpoint(c)
 	appType := c.MustGet("APP_TYPE").(string)
-	clientIP := c.ClientIP()
+	var clientIP string = c.ClientIP()
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
 	drcStats, err := internal.DrcJsonToStruct(string(jsonData))
 	if err != nil {
@@ -22,13 +23,14 @@ func UpsertResourceHandler(c *gin.Context) {
 	}
 
 	if appType == "single_insert" {
-		singleID := clientIP + "-" + internal.DateFormatID(drcStats.Timestamp.TimeSeconds)
 		stats := internal.ConvertToStorage(drcStats)
-		stats.ID = singleID
+		stats.ID = clientIP + "-" + internal.DateFormatID(drcStats.Timestamp.TimeSeconds)
+		stats.Hostname = clientIP
 		createResource(c, stats)
 	} else if appType == "single_upsert" {
 		stats := internal.ConvertToStorage(drcStats)
 		stats.ID = clientIP
+		stats.Hostname = clientIP
 		if resourceExists(c, stats.ID) {
 			updateResource(c, stats)
 		} else {
@@ -86,6 +88,109 @@ func GetResourceHandler(c *gin.Context) {
 	}
 	c.JSON(200, readRes)
 }
+
+//GetAssetResourceListTime, , GetSummaryAnalysisTime
+func ExecuteCustomQuery(c *gin.Context) {
+	defer internal.RecoverEndpoint(c)
+	payload, _ := ioutil.ReadAll(c.Request.Body)
+	contractType := c.Param("contract")
+	var response string
+
+	if contractType != "resources" && contractType != "latency" && contractType != "inventory" {
+		c.JSON(404, gin.H{"error": fmt.Sprintf("Error: Failed to submit, the contract '%s' does not exist", contractType)})
+	} else {
+		contract := c.MustGet(contractType).(*gateway.Contract)
+		res, err := contract.EvaluateTransaction("ExecuteQuery", string(payload))
+		if err != nil {
+			panic(err.Error())
+		}
+		response = string(res)
+
+		c.JSON(200, response)
+	}
+
+}
+
+func GetAllAssetResourceList(c *gin.Context) {
+	contract := c.MustGet("resources").(*gateway.Contract)
+	device := c.Param("device")
+	res, err := contract.EvaluateTransaction("GetAssetResource", device)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.ArrayStoredStat(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
+}
+
+func GetAssetResourceListTime(c *gin.Context) {
+	contract := c.MustGet("resources").(*gateway.Contract)
+	device := c.Param("device")
+	minutes := c.Param("minutes")
+	res, err := contract.EvaluateTransaction("GetAssetResourceListTime", device, minutes)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.ArrayStoredStat(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
+}
+
+func GetSummaryAnalysisTime(c *gin.Context) {
+	contract := c.MustGet("resources").(*gateway.Contract)
+	device := c.Param("device")
+	minutes := c.Param("minutes")
+	res, err := contract.EvaluateTransaction("GetSummaryAnalysisTime", device, minutes)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	//log.Println("/n---------/n" + string(res) + "/n---------/n")
+	readRes, err := internal.JsonToStatAnalysis(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
+}
+
+func ManualSummaryAnalysisTime(c *gin.Context, device string, minutes string, c1 chan internal.StatAnalysis, waitGroup *sync.WaitGroup) {
+	contract := c.MustGet("resources").(*gateway.Contract)
+	res, err := contract.EvaluateTransaction("GetSummaryAnalysisTime", device, minutes)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	//log.Println("/n---------/n" + string(res) + "/n---------/n")
+	readRes, err := internal.JsonToStatAnalysis(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c1 <- readRes
+	defer waitGroup.Done()
+}
+
+// GetLastResourceSummary Not working due to CouchDB being flaky
+// func GetLastResourceSummary(c *gin.Context) {
+// 	defer internal.RecoverEndpoint(c)
+// 	contract := c.MustGet("resources").(*gateway.Contract)
+// 	asset := c.Param("asset")
+
+// 	res, err := contract.EvaluateTransaction("GetLastResourceSummary", asset)
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// 	readRes, err := internal.JsonToStatSummary(string(res))
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// 	c.JSON(200, readRes)
+// }
 
 // PRIVATE FUNCTIONS
 func resourceExists(c *gin.Context, statIP string) bool {
