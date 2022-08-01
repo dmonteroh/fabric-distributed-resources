@@ -3,8 +3,8 @@ package pkg
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
@@ -111,6 +111,21 @@ func ExecuteCustomQuery(c *gin.Context) {
 
 }
 
+func GetAllAssetResourceList(c *gin.Context) {
+	contract := c.MustGet("resources").(*gateway.Contract)
+	device := c.Param("device")
+	res, err := contract.EvaluateTransaction("GetAssetResource", device)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.ArrayStoredStat(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c.JSON(200, readRes)
+}
+
 func GetAssetResourceListTime(c *gin.Context) {
 	contract := c.MustGet("resources").(*gateway.Contract)
 	device := c.Param("device")
@@ -120,7 +135,6 @@ func GetAssetResourceListTime(c *gin.Context) {
 	if err != nil {
 		panic(err.Error())
 	}
-	log.Println("/n---------/n" + string(res) + "/n---------/n")
 	readRes, err := internal.ArrayStoredStat(string(res))
 	if err != nil {
 		panic(err.Error())
@@ -137,12 +151,28 @@ func GetSummaryAnalysisTime(c *gin.Context) {
 	if err != nil {
 		panic(err.Error())
 	}
-	log.Println("/n---------/n" + string(res) + "/n---------/n")
+	//log.Println("/n---------/n" + string(res) + "/n---------/n")
 	readRes, err := internal.JsonToStatAnalysis(string(res))
 	if err != nil {
 		panic(err.Error())
 	}
 	c.JSON(200, readRes)
+}
+
+func ManualSummaryAnalysisTime(c *gin.Context, device string, minutes string, c1 chan internal.StatAnalysis, waitGroup *sync.WaitGroup) {
+	contract := c.MustGet("resources").(*gateway.Contract)
+	res, err := contract.EvaluateTransaction("GetSummaryAnalysisTime", device, minutes)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	//log.Println("/n---------/n" + string(res) + "/n---------/n")
+	readRes, err := internal.JsonToStatAnalysis(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	c1 <- readRes
+	defer waitGroup.Done()
 }
 
 // GetLastResourceSummary Not working due to CouchDB being flaky

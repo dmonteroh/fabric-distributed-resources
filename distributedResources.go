@@ -9,6 +9,7 @@ import (
 
 	"github.com/dmonteroh/fabric-distributed-resources/internal"
 	"github.com/dmonteroh/fabric-distributed-resources/pkg"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
@@ -23,6 +24,7 @@ func main() {
 	resourcesContract := internal.GetEnv("RESROUCES_SC", "resources-sc")
 	inventoryContract := internal.GetEnv("INVENTORY_SC", "inventory-sc")
 	latencyContract := internal.GetEnv("LATENCY_SC", "latency-sc")
+	selectorContract := internal.GetEnv("SELECTOR_SC", "selector-sc")
 
 	// MAP VARIABLES INTO MAP
 	variables := map[string]string{
@@ -36,6 +38,7 @@ func main() {
 	resourcesSC := network.GetContract(resourcesContract)
 	inventorySC := network.GetContract(inventoryContract)
 	latencySC := network.GetContract(latencyContract)
+	selectorSC := network.GetContract(selectorContract)
 
 	// INIT IS FOR DEBUGGING PURPOSES
 	// _, err := inentorySC.SubmitTransaction("InitLedger")
@@ -49,6 +52,8 @@ func main() {
 	r.Use(internal.ContractMiddleware("resources", resourcesSC))
 	r.Use(internal.ContractMiddleware("inventory", inventorySC))
 	r.Use(internal.ContractMiddleware("latency", latencySC))
+	r.Use(internal.ContractMiddleware("selector", selectorSC))
+	r.Use(cors.Default())
 
 	// --- APP HTTP ROUTES
 	// ASSETS
@@ -58,6 +63,7 @@ func main() {
 	r.POST("/resources", pkg.UpsertResourceHandler)
 	r.GET("/resources/device/:device/minutes/:minutes", pkg.GetAssetResourceListTime)
 	r.GET("/resources/analysis/device/:device/minutes/:minutes", pkg.GetSummaryAnalysisTime)
+	r.GET("/resources/device/:device", pkg.GetAllAssetResourceList)
 	//r.GET("/resources/summary/last/:asset", pkg.GetLastResourceSummary)
 	// INVENTORY
 	r.GET("/inventory", pkg.GetAllInventoryHandler)
@@ -77,6 +83,12 @@ func main() {
 	r.GET("/latency/:asset", pkg.GetLatencyHandler)
 	r.PUT("/latency", pkg.UpdateLatencyHandler)
 	r.POST("/latency", pkg.CreateLatencyHandler)
+	// -- SELECTOR
+	r.GET("/selector/target/:target/minutes/:minutes/gpu/:gpu", pkg.GetSelectedAssetHandler)
+	r.GET("/selector/target/:target", pkg.GetAllSelectionTargetHandler)
+	r.GET("/selector/asset/:asset", pkg.GetAllSelectionServerHandler)
+	r.GET("/selector/:id", pkg.GetSelectorHandler)
+	r.GET("/selector", pkg.GetAllSelectionsHandler)
 	// -- COLLECTOR
 	r.POST("/collector", pkg.UpsertResourceHandler)
 	r.POST("/measurement", pkg.CreateLatencyHandler)

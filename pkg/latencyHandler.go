@@ -104,6 +104,22 @@ func GetAnalysisTimeTarget(c *gin.Context) {
 	c.JSON(200, readRes)
 }
 
+func ManualAnalysisTimeTarget(c *gin.Context) []internal.LatencyAnalysis {
+	contract := c.MustGet("latency").(*gateway.Contract)
+	target := c.Param("target")
+	minutes := c.Param("minutes")
+	res, err := contract.EvaluateTransaction("GetAnalysisTimeTarget", target, minutes)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	readRes, err := internal.JsonToLatencyAnalysisArray(string(res))
+	if err != nil {
+		panic(err.Error())
+	}
+	return readRes
+}
+
 func GetLimitedLatencyListSource(c *gin.Context) {
 	contract := c.MustGet("latency").(*gateway.Contract)
 	source := c.Param("source")
