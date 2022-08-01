@@ -12,21 +12,22 @@ import (
 
 func GetEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok && value != "" {
-		fmt.Println(value)
+		//fmt.Println(value)
 		return value
 	}
 	return fallback
 }
 
-func KeysInStringMap(mapObj map[string]string, keys []string) bool {
-	for _, key := range keys {
-		_, ok := mapObj[key]
-		if !ok {
-			return false
-		}
-	}
-	return true
-}
+//// Removed as is currently unused
+// func KeysInStringMap(mapObj map[string]string, keys []string) bool {
+// 	for _, key := range keys {
+// 		_, ok := mapObj[key]
+// 		if !ok {
+// 			return false
+// 		}
+// 	}
+// 	return true
+// }
 
 func DateFormatID(d int64) string {
 	t := time.Unix(d, 0)
